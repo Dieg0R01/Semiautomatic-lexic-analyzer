@@ -29,11 +29,28 @@ public class LexicalAnalyzer {
         /*Con esos datos, se puede calcular el identificador del token y su lexema.
         No se os olvide actualizar posActual al generar el token
         */
-        int posActual;
-        int posLast;
+        int actualPosition = actualPosition;
+        int lastState = -1;
+        int posLastChain = -1;
+
+        while (hasMore()) {
+            int actualState = f.transition(f.getActualState(), actualPosition);
+            if (actualState == -1) {
+                f.setActualState(0);
+                break;
+            } else {
+                if (f.isFinal(actualState)) {
+                    f.setActualState(actualState);
+                    actualState++;
+                }
+                lastState = actualState;
+                posLastChain = actualPosition;
+            }
+        }
 
     }
     public boolean hasMore() {
+        return actualPosition < chain.length;
     }
     public List<Token> getHistory() {
     }
