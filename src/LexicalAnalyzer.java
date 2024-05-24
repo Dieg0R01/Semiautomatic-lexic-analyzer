@@ -5,14 +5,14 @@ import java.util.Map;
 public class LexicalAnalyzer {
     private int[] chain;
     private FiniteAutomata f;
-    private int actualPosition;
+    private int posActual;
     private Map<Integer,String> tokens;
     private List<Token> history;
 
     public LexicalAnalyzer(int[] chain, FiniteAutomata f, Map<Integer,String> tokens) {
         this.chain = chain;
         this.f = f;
-        this.actualPosition = 0;
+        this.posActual = 0;
         this.tokens = tokens;
         this.history = new ArrayList<>();
     }
@@ -21,17 +21,9 @@ public class LexicalAnalyzer {
      * Hay que ser muy cuidadoso para evitar errores por final de cadena, transición a error, etc.
      * */
     public Token nextToken() {
-        /*utilizar variables “locales” para:
-        •Anotar la posición en que estamos en cada instante en la cadena, sin modificar posActual
-        •Anotar el último estado final visitado
-        •Anotar en qué posición de la cadena se estaba en el último final visitado
-        */
-        /*Con esos datos, se puede calcular el identificador del token y su lexema.
-        No se os olvide actualizar posActual al generar el token
-        */
-        int actualPosition = actualPosition;
-        int lastState = -1;
-        int posLastChain = -1;
+        int actualPosition = posActual; // posición del chain (alfabeto), iterador en el algoritmo
+        int lastPosition = -1; // posición del chain (alfabeto), ultima posición
+        int lastState = -1; // valor del ultimo estado
 
         while (hasMore()) {
             int actualState = f.transition(f.getActualState(), actualPosition);
@@ -44,17 +36,22 @@ public class LexicalAnalyzer {
                     actualState++;
                 }
                 lastState = actualState;
-                posLastChain = actualPosition;
+                lastPosition = actualPosition;
             }
         }
 
     }
     public boolean hasMore() {
-        return actualPosition < chain.length;
+        return posActual < chain.length;
     }
     public List<Token> getHistory() {
+        return history;
     }
     public void reset(){
+        if (posActual != 0 && getHistory() != null) {
+            posActual = 0;
+            history.clear();
+        }
 
     }
     public void newChain(int[] chain) {
