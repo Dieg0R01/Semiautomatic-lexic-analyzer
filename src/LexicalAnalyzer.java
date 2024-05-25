@@ -16,10 +16,7 @@ public class LexicalAnalyzer {
         this.tokens = tokens;
         this.history = new ArrayList<>();
     }
-    /* Método esencial para hacer avanzar el análisis; su función es generar el siguiente token. No hay
-     * que olvidar que debe ser el más largo posible.
-     * Hay que ser muy cuidadoso para evitar errores por final de cadena, transición a error, etc.
-     * */
+
     public Token nextToken() {
         int actualPosition = posActual; // Position on chain while iterations
         int lastPosition = -1; // Remember last final position
