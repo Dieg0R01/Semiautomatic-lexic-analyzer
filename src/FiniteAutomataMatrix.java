@@ -6,6 +6,11 @@ public class FiniteAutomataMatrix extends FiniteAutomata{
         this.matrix = matrix;
     }
 
+    public FiniteAutomataMatrix(int num, int alphabet, boolean[] finals, int[][] matrix) {
+        super(num, alphabet, finals);
+        this.matrix = matrix;
+    }
+
     @Override
     public int transition(int state, int word) {
         return matrix[state][word];

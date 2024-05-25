@@ -21,26 +21,54 @@ public class LexicalAnalyzer {
      * Hay que ser muy cuidadoso para evitar errores por final de cadena, transición a error, etc.
      * */
     public Token nextToken() {
-        int actualPosition = posActual; // posición del chain (alfabeto), iterador en el algoritmo
-        int lastPosition = -1; // posición del chain (alfabeto), ultima posición
-        int lastState = -1; // valor del ultimo estado
+        int actualPosition = posActual; // Position on chain while iterations
+        int lastPosition = -1; // Remember last final position
+        int actualState = -1; // Actual state on matrix
+        int lastState = -1; // Remember last final state
 
-        while (hasMore()) {
-            int actualState = f.transition(f.getActualState(), actualPosition);
+        // If there are still tokens left to read
+        while (actualPosition < chain.length) {
+            // Next state
+            actualState = f.transition(f.getActualState(), chain[actualPosition]);
+
+            // If not valid -> reset
             if (actualState == -1) {
                 f.setActualState(0);
                 break;
-            } else {
-                if (f.isFinal(actualState)) {
-                    f.setActualState(actualState);
-                    actualState++;
-                }
+            }
+
+            // If final state
+            if (f.isFinal(actualState)) {
+                // Update values
                 lastState = actualState;
                 lastPosition = actualPosition;
             }
+            // Update automata and continue
+            f.setActualState(actualState);
+            actualPosition++;
         }
 
+        if (lastState != -1) {
+
+            // Keep lexema
+            List<Integer> lexema = new ArrayList<>();
+            for (int i = posActual; i <= lastPosition; i++) {
+                lexema.add(chain[i]);
+            }
+
+            // Search token and lexema
+            Token token = new Token(tokens.get(lastState), lexema);
+            history.add(token);
+
+            // Update position and return
+            posActual = lastPosition + 1;
+            return token;
+        }
+
+        return null;
+
     }
+
     public boolean hasMore() {
         return posActual < chain.length;
     }
@@ -48,16 +76,23 @@ public class LexicalAnalyzer {
         return history;
     }
     public void reset(){
-        if (posActual != 0 && getHistory() != null) {
-            posActual = 0;
-            history.clear();
-        }
-
+        posActual = 0;
+        history.clear();
+        chain = null;
     }
     public void newChain(int[] chain) {
+        reset();
         this.chain = chain;
     }
-    public Map<Integer,String> completeAnalisys() {
-        return this.tokens;
+    public List<Token> completeAnalisys() {
+        List<Token> tokenList = new ArrayList<>();
+        while (hasMore()) {
+            Token token = nextToken();
+            if (token != null) {
+                tokenList.add(token);
+            }
+        }
+        return tokenList;
     }
+
 }
